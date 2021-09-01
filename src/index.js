@@ -1,73 +1,54 @@
-import menu from "./menu.json";  
+import menuTemplate from './template/markup.hbs';
+import menuList from './menu.json';
 import './styles.css';
-import menuTemplate from './template.hbs';
 
+const refs = {
+    menu: document.querySelector('.js-menu'),
+    checkBox: document.querySelector('#theme-switch-toggle'),
+    body: document.querySelector('body'),
+};
 const Theme = {
   LIGHT: 'light-theme',
   DARK: 'dark-theme',
 };
+const currentTheme = localStorage.getItem("theme")
+const theme = JSON.parse(currentTheme)
 
-//menu render creating
-const menuMarkup = createMenuMarkup(menu);
-function createMenuMarkup(menu) {
-  // return menu.map(menuItem=>menuTemplate(menuItem)).join('');
-  return menu.map(menuTemplate).join('');
+refs.checkBox.addEventListener('change', onChangeTheme);
+
+
+function createMarkup(menuList) {
+    return menuList.map(menuTemplate).join('');
 };
-
-const menuRef = document.querySelector('.js-menu');
-console.log(menuRef);
-menuRef.insertAdjacentHTML('beforeend', menuMarkup);
+const markup = createMarkup(menuList);
+refs.menu.insertAdjacentHTML('beforeend', markup);
 
 
-// button switching
+switch (theme) {
+    case null:
+    localStorage.setItem("theme", JSON.stringify(Theme.LIGHT))   
+    break;
 
-const toolbarColor = document.body;
-const inputChange = document.querySelector('#theme-switch-toggle');
-inputChange.addEventListener('change', colorChange);
+    case Theme.DARK:
+    refs.body.classList.add(theme)
+    refs.checkBox.setAttribute("checked", true) 
+    break;  
 
-restoreTheme();
-
-function colorChange() {
-  toolbarColor.classList.toggle('dark-theme');
-
-  switch (getCurrentTheme()) {
-    case 'dark':
-      localStorage.setItem('switch', 'light');
-      break;
-    
-    case 'light':
-      localStorage.setItem('switch', 'dark');
-      break;
-    
     default:
-      break;
-  }
+    refs.body.classList.add(theme)  
 }
 
-function restoreTheme() {
-  switch (getCurrentTheme()) {
-    case 'dark':
-      toolbarColor.classList.add('dark-theme');
-      inputChange.checked = true;
-      break;
-    
-    case 'light':
-      toolbarColor.classList.remove('dark-theme');
-      break;
-    
-    default:
-      break;
-  }
-}
 
-function getCurrentTheme() {
-  let currentThemeValue = null;
-
-  if (!localStorage.getItem('switch')){
-    currentThemeValue = localStorage.setItem('switch', 'light');
-  } else {
-    currentThemeValue = localStorage.getItem('switch');
-  }
-  return currentThemeValue;
-}
- 
+function onChangeTheme() {
+    if (refs.checkBox.checked === true) {
+        refs.body.classList.add(Theme.DARK)
+        refs.body.classList.remove(Theme.LIGHT)
+        refs.checkBox.setAttribute("checked", true)
+        localStorage.setItem ("theme", JSON.stringify(Theme.DARK))
+    } else {
+        refs.body.classList.add(Theme.LIGHT);
+        refs.body.classList.remove(Theme.DARK)
+        refs.checkBox.setAttribute("checked", false)
+        localStorage.setItem ("theme", JSON.stringify(Theme.LIGHT))
+    };
+};
